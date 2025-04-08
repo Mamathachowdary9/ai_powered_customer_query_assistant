@@ -40,6 +40,7 @@ interface Product {
 function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const mockProducts: Product[] = [
     {
@@ -73,17 +74,32 @@ function App() {
         setProducts(mockProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchProducts();
   }, []);
 
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <>
       <Header />
       <Box p={4} sx={{ backgroundColor: "#f1f3f6", height: "80vh" }}>
-        {!selectedProduct && (
+        {!selectedProduct ? (
           <Grid container spacing={3}>
             {products.map((product) => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={product.id}>
@@ -130,6 +146,33 @@ function App() {
               </Grid>
             ))}
           </Grid>
+        ) : (
+          <Box maxWidth="md" mx="auto">
+            <Button
+              startIcon={<ArrowBack />}
+              onClick={() => setSelectedProduct(null)}
+              sx={{ mb: 2 }}
+            >
+              Back to Products
+            </Button>
+
+            <Card>
+              <CardHeader
+                sx={{
+                  boxShadow: "rgba(0, 0, 0, 0.1) 0px 1px 2px 0px",
+                  backgroundColor: "rgb(255, 255, 255)",
+                  borderBottom: "2px solid rgb(240, 240, 240)",
+                }}
+                title={`AI Assistant for ${selectedProduct.name}`}
+                subheader="Ask me anything about this product"
+                avatar={
+                  <Avatar>
+                    <SmartToy />
+                  </Avatar>
+                }
+              />
+            </Card>
+          </Box>
         )}
       </Box>
     </>
