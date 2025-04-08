@@ -1,7 +1,6 @@
-import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, IconButton, Toolbar } from "@mui/material";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Side from "../assets/sidebar-icon.png";
-import { useState } from "react";
 
 const Header = () => {
   return (
@@ -29,7 +28,6 @@ const Header = () => {
             aria-label="account of current user"
             aria-controls="menu-appbar"
             aria-haspopup="true"
-            // onClick={handleMenu}
             color="inherit"
           >
             <AccountCircle />
