@@ -5,7 +5,7 @@ import { useState } from "react";
 
 const Header = () => {
   return (
-    <Box sx={{ flexGrow: 1, height: "7%" }}>
+    <Box sx={{ flexGrow: 1, height: "7%", position: "sticky" }}>
       <AppBar
         position="static"
         color="transparent"
