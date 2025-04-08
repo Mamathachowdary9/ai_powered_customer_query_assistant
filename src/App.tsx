@@ -37,9 +37,20 @@ interface Product {
   image: string;
 }
 
+interface Message {
+  id: string;
+  text: string;
+  sender: "user" | "ai";
+  timestamp: Date;
+  productId?: string;
+}
+
 function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const mockProducts: Product[] = [
@@ -81,6 +92,148 @@ function App() {
 
     fetchProducts();
   }, []);
+
+  // Initialize chat when product is selected
+  useEffect(() => {
+    if (selectedProduct) {
+      setMessages([
+        {
+          id: "1",
+          text: `Hello! I'm your AI assistant for ${selectedProduct.name}. How can I help you today?`,
+          sender: "ai",
+          timestamp: new Date(),
+          productId: selectedProduct.id,
+        },
+      ]);
+    }
+  }, [selectedProduct]);
+
+  const getTodayKey = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // 'yyyy-mm-dd'
+  };
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedProduct) return;
+
+    const productId = selectedProduct.id;
+    const todayKey = getTodayKey();
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: newMessage,
+      sender: "user",
+      timestamp: new Date(),
+      productId,
+    };
+
+    const stored = JSON.parse(localStorage.getItem("chatMessages") || "{}");
+    const productChats = stored[productId] || {};
+    const todayMessages = productChats[todayKey] || [];
+
+    const updatedTodayMessages = [...todayMessages, userMessage];
+    const updatedProductChats = {
+      ...productChats,
+      [todayKey]: updatedTodayMessages,
+    };
+    const updatedStored = {
+      ...stored,
+      [productId]: updatedProductChats,
+    };
+
+    setMessages(updatedTodayMessages);
+    setNewMessage("");
+    setIsTyping(true);
+    localStorage.setItem("chatMessages", JSON.stringify(updatedStored));
+
+    try {
+      const response = await fetch("http://localhost:5000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, message: newMessage }),
+      });
+
+      const data = await response.json();
+
+      const aiResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: data.response || "Sorry, I couldn't understand that.",
+        sender: "ai",
+        timestamp: new Date(),
+        productId,
+      };
+
+      const finalTodayMessages = [...updatedTodayMessages, aiResponse];
+      updatedProductChats[todayKey] = finalTodayMessages;
+      updatedStored[productId] = updatedProductChats;
+
+      setMessages(finalTodayMessages);
+      localStorage.setItem("chatMessages", JSON.stringify(updatedStored));
+    } catch (error) {
+      console.error("API error:", error);
+
+      const errorResponse: Message = {
+        id: (Date.now() + 2).toString(),
+        text: "Oops! Something went wrong while fetching the response.",
+        sender: "ai",
+        timestamp: new Date(),
+        productId,
+      };
+
+      const finalTodayMessages = [...updatedTodayMessages, errorResponse];
+      updatedProductChats[todayKey] = finalTodayMessages;
+      updatedStored[productId] = updatedProductChats;
+
+      setMessages(finalTodayMessages);
+      localStorage.setItem("chatMessages", JSON.stringify(updatedStored));
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const getInitialMessage = (product: Product): Message => ({
+    id: Date.now().toString(),
+    text: `Hello! I'm your AI assistant for ${product.name}. How can I help you today?`,
+    sender: "ai",
+    timestamp: new Date(),
+    productId: product.id,
+  });
+
+  useEffect(() => {
+    if (selectedProduct) {
+      const productId = selectedProduct.id;
+      const todayKey = getTodayKey();
+
+      const storedMessages = JSON.parse(
+        localStorage.getItem("chatMessages") || "{}"
+      );
+      const productMessages = storedMessages[productId] || {};
+      const todayMessages = productMessages[todayKey] || [];
+
+      if (todayMessages.length > 0) {
+        setMessages(todayMessages);
+      } else {
+        const initialMessage = getInitialMessage(selectedProduct);
+        const updatedTodayMessages = [initialMessage];
+
+        const updatedProductMessages = {
+          ...productMessages,
+          [todayKey]: updatedTodayMessages,
+        };
+
+        const updatedStoredMessages = {
+          ...storedMessages,
+          [productId]: updatedProductMessages,
+        };
+
+        localStorage.setItem(
+          "chatMessages",
+          JSON.stringify(updatedStoredMessages)
+        );
+        setMessages(updatedTodayMessages);
+      }
+    }
+  }, [selectedProduct]);
 
   if (loading) {
     return (
@@ -171,6 +324,147 @@ function App() {
                   </Avatar>
                 }
               />
+              <CardContent
+                sx={{
+                  padding: "0px !important",
+                }}
+              >
+                <Box
+                  height={400}
+                  sx={{
+                    overflowY: "auto",
+                    bgcolor: "rgb(241, 243, 246)",
+                    backgroundImage:
+                      'url("https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/endless-clouds_5904c7.svg")',
+                    borderRadius: 1,
+                    p: 2,
+                  }}
+                >
+                  <List>
+                    {messages.map((message) => (
+                      <ListItem
+                        key={message.id}
+                        sx={{
+                          justifyContent:
+                            message.sender === "user"
+                              ? "flex-end"
+                              : "flex-start",
+                        }}
+                      >
+                        <Box
+                          display="flex"
+                          flexDirection={
+                            message.sender === "user" ? "row-reverse" : "row"
+                          }
+                          alignItems="flex-end"
+                          maxWidth="80%"
+                          gap={message.sender === "user" ? "0.8rem" : "0rem"}
+                        >
+                          <ListItemAvatar>
+                            <Avatar sx={{ width: "30px", height: "30px" }}>
+                              {message.sender === "user" ? (
+                                <Person sx={{ width: "0.8em" }} />
+                              ) : (
+                                <SmartToy sx={{ width: "0.8em" }} />
+                              )}
+                            </Avatar>
+                          </ListItemAvatar>
+                          <Box
+                            sx={{
+                              bgcolor:
+                                message.sender === "user"
+                                  ? "primary.main"
+                                  : "rgb(255, 255, 255)",
+                              color:
+                                message.sender === "user"
+                                  ? "primary.contrastText"
+                                  : "text.primary",
+                              px: 2,
+                              py: 1,
+                              borderRadius: 2,
+                              padding: "6px 12px",
+                            }}
+                          >
+                            <ListItemText
+                              primary={message.text}
+                              primaryTypographyProps={{
+                                fontSize: "14px",
+                              }}
+                              secondary={new Date(
+                                message.timestamp
+                              ).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                              secondaryTypographyProps={{
+                                fontSize: "10px",
+                                fontWeight: 500,
+                                color:
+                                  message.sender === "user"
+                                    ? "primary.contrastText"
+                                    : "text.secondary",
+                                display: "flex",
+                                justifyContent: "flex-end",
+                              }}
+                            />
+                          </Box>
+                        </Box>
+                      </ListItem>
+                    ))}
+                    {isTyping && (
+                      <ListItem>
+                        <Box display="flex" alignItems="center">
+                          <Avatar>
+                            <SmartToy />
+                          </Avatar>
+                          <Box ml={1} display="flex">
+                            {[...Array(3)].map((_, i) => (
+                              <Box
+                                key={i}
+                                width={8}
+                                height={8}
+                                bgcolor="grey.500"
+                                borderRadius="50%"
+                                mr={i < 2 ? 1 : 0}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
+                      </ListItem>
+                    )}
+                  </List>
+                </Box>
+                <Box display="flex" gap={1}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor: "#fff !important",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#fff",
+                        },
+                        // "&.Mui-focused fieldset": {
+                        //   borderColor: "#fff",
+                        // },
+                      },
+                    }}
+                    placeholder="Type your question..."
+                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                  />
+                  <IconButton
+                    color="primary"
+                    onClick={handleSendMessage}
+                    disabled={!newMessage.trim()}
+                  >
+                    <Send />
+                  </IconButton>
+                </Box>
+              </CardContent>
             </Card>
           </Box>
         )}
