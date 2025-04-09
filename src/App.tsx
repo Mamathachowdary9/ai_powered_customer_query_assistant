@@ -219,7 +219,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "https://ai-assistant-backend-node.onrender.com/chat",
+        "https://ai-assistant-backend-node-1.onrender.com/chat",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
