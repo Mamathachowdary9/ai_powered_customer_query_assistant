@@ -16,6 +16,9 @@ import {
   IconButton,
   Grid,
   Box,
+  Autocomplete,
+  Paper,
+  Popper,
 } from "@mui/material";
 import {
   ArrowBack,
@@ -54,8 +57,252 @@ function App() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const QUESTIONS = [
+    "What is this product?",
+    "What is the product about?",
+    "What does this product do?",
+    "What does this amazing product offer?",
+    "What is in this product?",
+    "What does your product include?",
+    "What is the main purpose of the product?",
+    "What does the product actually do?",
+    "Product description?",
+    "Can I get the product description?",
+    "What’s the product description?",
+    "Please give me the product description.",
+    "I’d like to read the product description.",
+    "Could you explain what this product does?",
+    "What is it used for?",
+    "What can I do with this product?",
+    "What are the product features?",
+    "Can you list product features?",
+    "Tell me about product features.",
+    "What features does this product have?",
+    "Are there any key features?",
+    "What makes this product special?",
+    "Tell me about the product.",
+    "Can you tell me more about this product?",
+    "I’d like to know about the product.",
+    "Give me info about the product.",
+    "Share some details about the product.",
+    "Describe the product.",
+    "Can you describe this product?",
+    "Please describe the product.",
+    "How would you describe the product?",
+    "Give me a description of the product.",
+    "How much does it cost?",
+    "How much is the price?",
+    "How much will this cost me?",
+    "How much does the product cost?",
+    "How much should I pay?",
+    "How much is this item?",
+    "What's the price of the product?",
+    "Price of the product?",
+    "Can you tell me the product price?",
+    "What is the product’s price?",
+    "Show me the price for the product.",
+    "What's the price?",
+    "What is the price?",
+    "Can you tell me the price?",
+    "I want to know the price.",
+    "Product price?",
+    "Tell me the product price.",
+    "What’s the price tag of the product?",
+    "Do you know the price of the product?",
+    "What’s the cost of this?",
+    "Cost of this item?",
+    "How much is the cost of this?",
+    "Can you tell me the cost of this?",
+    "What is the name of the product?",
+    "What’s the product name?",
+    "What is the name of this item?",
+    "What do you call this product?",
+    "What is this item called?",
+    "What is this product named?",
+    "What’s the name of this product?",
+    "Can you tell me the name of the product?",
+    "I want the name of this product.",
+    "Give me the name of the product.",
+    "Tell me the name of this product.",
+    "Product name?",
+    "What's the product name?",
+    "Do you know the product name?",
+    "Can I get the product name?",
+    "What did I order?",
+    "Can you tell me what I ordered?",
+    "I forgot what I ordered.",
+    "Show me what I ordered.",
+    "What is the product availability?",
+    "Is it available now?",
+    "Can I buy it?",
+    "Is it available?",
+    "Do you sell this?",
+    "What’s the product availability?",
+    "Can you tell me the product availability?",
+    "Is the product available?",
+    "What’s the availability status of the product?",
+    "Availability of the product?",
+    "Is the product currently available?",
+    "Can you check product availability?",
+    "Tell me about product availability.",
+    "Is this in stock right now?",
+    "Is the product available now?",
+    "Available now?",
+    "Is this available right now?",
+    "Is the item available now?",
+    "Am I able to purchase this?",
+    "Can I order this now?",
+    "Is it possible to buy this?",
+    "Can I purchase this?",
+    "Am I able to buy this?",
+    "Is it possible to buy it?",
+    "Is this available?",
+    "Is this product available?",
+    "Is it still available?",
+    "Can you check if it's available?",
+    "Are you selling this?",
+    "Is this for sale?",
+    "Can I purchase this from you?",
+    "Are you selling this item?",
+    "Do you offer this product?",
+    "Is it in stock?",
+    "Do you have it in stock?",
+    "Is this currently in stock?",
+    "Is it available in stock?",
+    "Is it still in stock?",
+    "Is this still available in stock?",
+    "Do you still have this in stock?",
+    "Is the item still in stock?",
+    "What’s the product stock?",
+    "Product stock status?",
+    "Can you check the product stock?",
+    "Do you have stock for this product?",
+    "Is there stock left?",
+    "Do you have any stock left?",
+    "Is there any left in stock?",
+    "Is stock remaining?",
+    "Can you check stock?",
+    "Check stock for this item?",
+    "Please check the stock.",
+    "Check if this is in stock?",
+    "How to use this?",
+    "How do I use this?",
+    "Can you tell me how to use it?",
+    "What is the way to use this?",
+    "Instructions on how to use this?",
+    "I need instructions.",
+    "Do you have instructions?",
+    "Where are the instructions?",
+    "Show me the instructions.",
+    "Provide instructions please.",
+    "Do you have a usage guide?",
+    "Give me the usage guide.",
+    "I need the usage guide.",
+    "Is there a usage guide for this?",
+    "Where can I find the usage guide?",
+    "How does it work?",
+    "Can you explain how this works?",
+    "What’s the working of this?",
+    "How exactly does this work?",
+    "Tell me how it works.",
+    "What should I do to use this?",
+    "Show me how to use this.",
+    "Can you guide me on how to use it?",
+    "Steps to use this?",
+    "How do I operate the product?",
+    "Show me how to operate the product.",
+    "Product operation steps?",
+    "Can I get help to operate the product?",
+    "Instructions to operate the product?",
+    "What is the warranty?",
+    "Does it come with a warranty?",
+    "Tell me about the warranty.",
+    "Warranty details?",
+    "Is warranty included?",
+    "Is there a guarantee?",
+    "Do you offer a guarantee?",
+    "What’s the product guarantee?",
+    "Tell me about the guarantee.",
+    "Guarantee info?",
+    "What’s the warranty period?",
+    "Tell me the warranty period.",
+    "How long is the warranty period?",
+    "Warranty duration?",
+    "Do you provide a warranty period?",
+    "Is it under warranty?",
+    "Is this item still under warranty?",
+    "Is my product under warranty?",
+    "Can you check if it’s under warranty?",
+    "Is this covered by warranty?",
+    "How long is the warranty?",
+    "What is the warranty length?",
+    "Duration of the warranty?",
+    "For how many months is the warranty?",
+    "Is there a long warranty?",
+    "What is the delivery date?",
+    "Can you tell me the delivery time?",
+    "Delivery date please?",
+    "When is the delivery date?",
+    "I need the delivery time.",
+    "When will it arrive?",
+    "When is my order arriving?",
+    "When does the product arrive?",
+    "When should I expect it to arrive?",
+    "When is it supposed to arrive?",
+    "What’s the expected delivery?",
+    "Expected delivery time?",
+    "What is the expected delivery date?",
+    "Expected delivery window?",
+    "Can I know the expected delivery?",
+    "What’s the shipping date?",
+    "Shipping date details?",
+    "When will it be shipped?",
+    "Tell me the shipping date.",
+    "When does it ship?",
+    "Will it be delivered by tomorrow?",
+    "Delivered by next week?",
+    "Is it delivered by Friday?",
+    "Can I get it delivered by a specific date?",
+    "Will it be delivered by today?",
+    "What’s my refund status?",
+    "Can you check the refund status?",
+    "I want to know the refund status.",
+    "Refund status please.",
+    "Status of my refund?",
+    "Has my refund been processed?",
+    "Do you know if the refund has been processed?",
+    "Has the refund gone through?",
+    "Refund processed yet?",
+    "Is the refund processing complete?",
+    "Is my refund done?",
+    "Is the refund complete?",
+    "Has my refund finished?",
+    "Is the refund finalized?",
+    "Is my refund already done?",
+    "When will I get my refund?",
+    "When can I expect the refund?",
+    "When is the refund coming?",
+    "When will the refund arrive?",
+    "How soon will I get my refund?",
+    "What’s my refund amount?",
+    "Can you tell me the refund amount?",
+    "I want to check the refund amount.",
+    "Refund amount please.",
+    "How much is the refund amount?",
+    "How much will I be refunded?",
+    "How much refund am I getting?",
+    "How much is my refund?",
+    "How much should I expect back?",
+    "How much is the refund?",
+    "How much will I get back as a refund?",
+    "What do I get back in refund?",
+    "Am I getting anything back?",
+    "Will I get all my money back...",
+  ];
 
   const mockProducts: Product[] = [
     {
@@ -272,6 +519,10 @@ function App() {
     timestamp: new Date(),
     productId: product.id,
   });
+
+  const filtered = QUESTIONS.filter((q) =>
+    q.toLowerCase().includes(inputValue.toLowerCase())
+  );
 
   useEffect(() => {
     if (selectedProduct) {
@@ -517,26 +768,83 @@ function App() {
                   </List>
                 </Box>
                 <Box display="flex" gap={1}>
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": {
-                          borderColor: "#fff !important",
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "#fff",
-                        },
-                        // "&.Mui-focused fieldset": {
-                        //   borderColor: "#fff",
-                        // },
-                      },
+                  <Autocomplete
+                    sx={{ width: "100%" }}
+                    freeSolo
+                    options={filtered}
+                    inputValue={inputValue}
+                    open={!!inputValue}
+                    PopperComponent={(props) => (
+                      <Popper
+                        {...props}
+                        placement="top-start"
+                        modifiers={[
+                          {
+                            name: "offset",
+                            options: {
+                              offset: [0, 8],
+                            },
+                          },
+                        ]}
+                        style={{
+                          zIndex: 1300,
+                          transformOrigin: "bottom left",
+                          ...props.style,
+                        }}
+                      />
+                    )}
+                    PaperComponent={(props) => (
+                      <Paper
+                        {...props}
+                        sx={{
+                          backgroundColor: "rgba(255, 255, 255, 0.3)",
+                          backdropFilter: "blur(5px)",
+                          boxShadow: "none",
+                          "& .MuiAutocomplete-listbox": {
+                            maxHeight: "10rem",
+                            overflow: "scroll",
+                            scrollbarWidth: "none",
+                            "&::-webkit-scrollbar": {
+                              display: "none",
+                            },
+                          },
+                        }}
+                      />
+                    )}
+                    onInputChange={(e, newInputValue) => {
+                      setInputValue(newInputValue);
+                      setNewMessage(newInputValue);
                     }}
-                    placeholder="Type your question..."
-                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                    onChange={(e, selectedValue) => {
+                      if (selectedValue) {
+                        setNewMessage(selectedValue);
+                        setInputValue(selectedValue);
+                      }
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        variant="outlined"
+                        placeholder="Type your question..."
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            "& fieldset": {
+                              borderColor: "#fff !important",
+                            },
+                            "&:hover fieldset": {
+                              borderColor: "#fff",
+                            },
+                          },
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                        }}
+                      />
+                    )}
                   />
                   <IconButton
                     color="primary"
