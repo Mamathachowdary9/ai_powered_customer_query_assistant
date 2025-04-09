@@ -428,18 +428,22 @@ function App() {
 
   const getTodayKey = () => {
     const today = new Date();
-    return today.toISOString().split("T")[0]; // 'yyyy-mm-dd'
+    return today.toISOString().split("T")[0];
   };
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedProduct) return;
+
+    const messageText = newMessage;
+    setNewMessage("");
+    setInputValue("");
 
     const productId = selectedProduct.id;
     const todayKey = getTodayKey();
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: newMessage,
+      text: messageText,
       sender: "user",
       timestamp: new Date(),
       productId,
@@ -841,6 +845,9 @@ function App() {
                           if (e.key === "Enter") {
                             e.preventDefault();
                             handleSendMessage();
+
+                            setInputValue("");
+                            setNewMessage("");
                           }
                         }}
                       />
@@ -848,7 +855,10 @@ function App() {
                   />
                   <IconButton
                     color="primary"
-                    onClick={handleSendMessage}
+                    onClick={() => {
+                      setInputValue("");
+                      handleSendMessage();
+                    }}
                     disabled={!newMessage.trim()}
                   >
                     <Send />
