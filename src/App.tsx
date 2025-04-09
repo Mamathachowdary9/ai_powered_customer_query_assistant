@@ -218,11 +218,14 @@ function App() {
     localStorage.setItem("chatMessages", JSON.stringify(updatedStored));
 
     try {
-      const response = await fetch("http://localhost:5000/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, message: newMessage }),
-      });
+      const response = await fetch(
+        "https://ai-assistant-backend-node.onrender.com/chat",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId, message: newMessage }),
+        }
+      );
 
       const data = await response.json();
 
@@ -361,6 +364,7 @@ function App() {
                         width: "8rem",
                       }}
                     ></img>
+
                     <Typography variant="body2" color="textSecondary" paragraph>
                       {product.description}
                     </Typography>
