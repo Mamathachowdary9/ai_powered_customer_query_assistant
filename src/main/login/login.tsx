@@ -28,14 +28,17 @@ const Login = () => {
 
   const handleLogin = async (values: any) => {
     try {
-      const response = await fetch(`${process.env.BACKEND_API}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userName: values.username,
-          password: values.password,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_API}/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userName: values.username,
+            password: values.password,
+          }),
+        }
+      );
       const data = await response.json();
       if (data.message === "Invalid credentials") {
         setAlertOpen(true);
