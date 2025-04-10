@@ -29,7 +29,7 @@ const Login = () => {
   const handleLogin = async (values: any) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_API}/login`,
+        "https://ai-assistant-backend-node-1.onrender.com/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

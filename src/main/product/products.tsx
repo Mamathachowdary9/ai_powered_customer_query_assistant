@@ -564,14 +564,17 @@ const Products = () => {
     localStorage.setItem("chatMessages", JSON.stringify(updatedStored));
 
     try {
-      const response = await fetch(`${process.env.BACKEND_API}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          product: selectedProduct,
-          message: newMessage,
-        }),
-      });
+      const response = await fetch(
+        "https://ai-assistant-backend-node-1.onrender.com/chat",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            product: selectedProduct,
+            message: newMessage,
+          }),
+        }
+      );
 
       const data = await response.json();
 
