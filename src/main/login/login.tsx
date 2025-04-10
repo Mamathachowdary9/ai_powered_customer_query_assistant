@@ -28,14 +28,17 @@ const Login = () => {
 
   const handleLogin = async (values: any) => {
     try {
-      const response = await fetch("http://localhost:5000/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userName: values.username,
-          password: values.password,
-        }),
-      });
+      const response = await fetch(
+        "https://ai-assistant-backend-node-1.onrender.com/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userName: values.username,
+            password: values.password,
+          }),
+        }
+      );
       const data = await response.json();
       if (data.message === "Invalid credentials") {
         setAlertOpen(true);
