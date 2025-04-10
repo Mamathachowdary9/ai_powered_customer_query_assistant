@@ -508,14 +508,17 @@ function App() {
     localStorage.setItem("chatMessages", JSON.stringify(updatedStored));
 
     try {
-      const response = await fetch("http://localhost:5000/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          product: selectedProduct,
-          message: newMessage,
-        }),
-      });
+      const response = await fetch(
+        "https://ai-assistant-backend-node-1.onrender.com/chat",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            product: selectedProduct,
+            message: newMessage,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -534,8 +537,6 @@ function App() {
       setMessages(finalTodayMessages);
       localStorage.setItem("chatMessages", JSON.stringify(updatedStored));
     } catch (error) {
-      console.error("API error:", error);
-
       const errorResponse: Message = {
         id: (Date.now() + 2).toString(),
         text: "Oops! Something went wrong while fetching the response.",
@@ -638,7 +639,7 @@ function App() {
   return (
     <>
       {/* <Login /> */}
-      {}
+
       <>
         <Header />
         <Box

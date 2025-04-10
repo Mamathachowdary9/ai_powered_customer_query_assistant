@@ -50,7 +50,7 @@
   flex-direction: column;
   height: 100%;
   min-height: 100vh;
-  min-width: 50%;
+  min-width: 20%;
   gap: 10rem;
   @media (max-width: 768px) {
     flex-wrap: wrap;
@@ -164,7 +164,7 @@
 
 .sign-in-container {
   width: 30.5rem;
-  height: 36.625rem;
+  height: 23.625rem;
   flex-shrink: 0;
   border-radius: 0.625rem;
   background: rgba(0, 12, 30, 0.6);

@@ -10,8 +10,62 @@ import "./login.css";
 import { ReactComponent as WhiteCircleIcon } from "../assets/whiteCircleIcon.svg";
 import { ReactComponent as PersonIcon } from "../assets/person_outline.svg";
 import { ReactComponent as LockIcon } from "../assets/lock_open.svg";
+import { ReactComponent as Visibility } from "./../assets/visibility.svg";
+import { ReactComponent as VisibilityOff } from "./../assets/visibility_off.svg";
+import { useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 const Login = () => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleLogin = async (values: any) => {
+    try {
+      const response = await fetch(
+        "https://ai-assistant-backend-node-1.onrender.com/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userName: values.username,
+            message: values.password,
+          }),
+        }
+      );
+      const data = await response.json();
+      console.log(data.response);
+    } catch (error) {
+    } finally {
+    }
+  };
+
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+  };
+
+  const signInSchema = Yup.object().shape({
+    username: Yup.string()
+      .matches(
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{3,}$/,
+        "Please enter a valid email address"
+      )
+      .required("Email is required"),
+    password: Yup.string().required("Password is required"),
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      username: "",
+      password: "",
+    },
+    onSubmit: (values) => {
+      handleLogin(values);
+    },
+    validationSchema: signInSchema,
+  });
+
   return (
     <>
       <div className="login-background">
@@ -58,71 +112,67 @@ const Login = () => {
                 </Typography>
                 <div className="sign-in-content">
                   {
-                    <form
-                    // onSubmit={formik.handleSubmit}
-                    >
+                    <form onSubmit={formik.handleSubmit}>
                       <TextField
-                        className="sign-in-fields"
-                        // className={
-                        //   formik.touched.username && formik.errors.username
-                        //     ? "sign-in-fields-error"
-                        //     : "sign-in-fields"
-                        // }
+                        className={
+                          formik.touched.username && formik.errors.username
+                            ? "sign-in-fields-error"
+                            : "sign-in-fields"
+                        }
                         placeholder="Email*"
                         variant="outlined"
-                        // value={formik.values.username}
-                        // error={Boolean(
-                        //   formik.touched.username && formik.errors.username
-                        // )}
-                        // onChange={formik.handleChange}
-                        // onBlur={formik.handleBlur}
+                        value={formik.values.username}
+                        error={Boolean(
+                          formik.touched.username && formik.errors.username
+                        )}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
                         name="username"
                       />
-                      {/* {formik.touched.username && formik.errors.username ? (
+                      {formik.touched.username && formik.errors.username ? (
                         <div className="error-msg">
                           {formik.errors.username}
                         </div>
-                      ) : null} */}
+                      ) : null}
                       <OutlinedInput
-                        className="sign-in-fields"
-                        // className={
-                        //   formik.touched.password && formik.errors.password
-                        //     ? "sign-in-fields-error"
-                        //     : "sign-in-fields"
-                        // }
+                        className={
+                          formik.touched.password && formik.errors.password
+                            ? "sign-in-fields-error"
+                            : "sign-in-fields"
+                        }
                         placeholder="Password*"
-                        // type={showPassword ? "text" : "password"}
-                        // value={formik.values.password}
-                        // error={
-                        //   formik.touched.password &&
-                        //   Boolean(formik.errors.password)
-                        // }
-                        // onChange={formik.handleChange}
-                        // onBlur={formik.handleBlur}
+                        type={showPassword ? "text" : "password"}
+                        value={formik.values.password}
+                        error={
+                          formik.touched.password &&
+                          Boolean(formik.errors.password)
+                        }
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
                         name="password"
                         endAdornment={
                           <InputAdornment position="end">
                             <IconButton
                               size="small"
                               aria-label="toggle password visibility"
-                              //   onClick={() => setShowPassword((show) => !show)}
-                              //   onMouseDown={handleMouseDownPassword}
+                              onClick={() => setShowPassword((show) => !show)}
+                              onMouseDown={handleMouseDownPassword}
                               edge="end"
                             >
-                              {/* {showPassword ? (
+                              {showPassword ? (
                                 <Visibility className="my-svg-icon" />
                               ) : (
                                 <VisibilityOff className="my-svg-icon" />
-                              )} */}
+                              )}
                             </IconButton>
                           </InputAdornment>
                         }
                       />
-                      {/* {formik.touched.password && formik.errors.password ? (
+                      {formik.touched.password && formik.errors.password ? (
                         <div className="error-msg">
                           {formik.errors.password}
                         </div>
-                      ) : null} */}
+                      ) : null}
                       <Button
                         fullWidth
                         type="submit"
