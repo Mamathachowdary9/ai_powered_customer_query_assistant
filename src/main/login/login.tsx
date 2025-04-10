@@ -1,8 +1,10 @@
 import {
+  Alert,
   Button,
   IconButton,
   InputAdornment,
   OutlinedInput,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
@@ -15,26 +17,38 @@ import { ReactComponent as VisibilityOff } from "./../assets/visibility_off.svg"
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
+  const [validateUser, setValidateUser] = useState("");
+  const [alertOpen, setAlertOpen] = useState(false);
 
   const handleLogin = async (values: any) => {
     try {
-      const response = await fetch(
-        "https://ai-assistant-backend-node-1.onrender.com/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userName: values.username,
-            message: values.password,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:5000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userName: values.username,
+          password: values.password,
+        }),
+      });
       const data = await response.json();
-      console.log(data.response);
+      if (data.message === "Invalid credentials") {
+        setAlertOpen(true);
+        setValidateUser("Invalid credentials");
+        localStorage.setItem("login", "false");
+      } else if (data.message === "Login successful") {
+        setAlertOpen(true);
+        setValidateUser("Successfully login!");
+        localStorage.setItem("login", "true");
+        navigate("/products");
+      }
     } catch (error) {
+      console.log("error occured");
     } finally {
     }
   };
@@ -189,6 +203,25 @@ const Login = () => {
           <div className="login-footer">© 2025 Mamatha all rights reserved</div>
         </div>
       </div>
+
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        autoHideDuration={2000}
+        open={alertOpen}
+        message={validateUser}
+        onClose={() => setAlertOpen(false)}
+      >
+        <Alert
+          onClose={() => setAlertOpen(false)}
+          severity={
+            validateUser === "Invalid credentials" ? "error" : "success"
+          }
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {validateUser}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

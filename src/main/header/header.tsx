@@ -1,8 +1,20 @@
-import { AppBar, Box, IconButton, Toolbar } from "@mui/material";
+import {
+  AppBar,
+  Box,
+  IconButton,
+  Menu,
+  MenuItem,
+  Toolbar,
+} from "@mui/material";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Side from "../assets/sidebar-icon.png";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
   return (
     <Box sx={{ flexGrow: 1, height: "7%", position: "sticky" }}>
       <AppBar
@@ -29,9 +41,35 @@ const Header = () => {
             aria-controls="menu-appbar"
             aria-haspopup="true"
             color="inherit"
+            onClick={(e) => setAnchorEl(e.currentTarget)}
           >
             <AccountCircle />
           </IconButton>
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            open={Boolean(anchorEl)}
+            onClose={() => setAnchorEl(null)}
+          >
+            <MenuItem
+              onClick={() => {
+                setAnchorEl(null);
+                localStorage.setItem("login", "false");
+                navigate("/login");
+              }}
+            >
+              Logout
+            </MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
     </Box>
