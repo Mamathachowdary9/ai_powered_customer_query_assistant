@@ -20,6 +20,7 @@ import {
   Paper,
   Popper,
   Dialog,
+  AlertColor,
 } from "@mui/material";
 import {
   ArrowBack,
@@ -30,6 +31,8 @@ import {
 } from "@mui/icons-material";
 import ForumIcon from "@mui/icons-material/Forum";
 import AddProductPage from "./add-product";
+import { ReactComponent as DeleteIcon } from "../assets/delete_icon.svg";
+import Notify from "../common/notify";
 
 interface Product {
   id: string;
@@ -58,14 +61,22 @@ interface Message {
 }
 
 const Products = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const userType: any = localStorage.getItem("userType");
+  const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState({
+    severity: "success",
+    msg: "",
+  } as {
+    severity: AlertColor;
+    msg: string;
+  });
 
   const QUESTIONS = [
     "What is this product?",
@@ -310,6 +321,7 @@ const Products = () => {
     "Will I get all my money back...",
   ];
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const mockProducts: Product[] = [
     {
       id: "1",
@@ -431,6 +443,18 @@ const Products = () => {
     },
   ];
 
+  useEffect(() => {
+    const existing = localStorage.getItem("lastProductId");
+    if (!existing) {
+      localStorage.setItem("lastProductId", "7");
+    }
+
+    const stored = localStorage.getItem("products");
+    if (!stored || stored === "") {
+      localStorage.setItem("products", JSON.stringify(mockProducts));
+    }
+  }, [mockProducts]);
+
   const getInitialMessage = (product: Product): Message => ({
     id: Date.now().toString(),
     text: `Hello! I'm your AI assistant for ${product.name}. How can I help you today?`,
@@ -444,18 +468,8 @@ const Products = () => {
   );
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        setProducts(mockProducts);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
+    const localProducts = localStorage.getItem("products");
+    setProducts(localProducts ? JSON.parse(localProducts) : []);
   }, []);
 
   useEffect(() => {
@@ -507,19 +521,6 @@ const Products = () => {
       }
     }
   }, [selectedProduct]);
-
-  if (loading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
 
   const getTodayKey = () => {
     const today = new Date();
@@ -612,38 +613,101 @@ const Products = () => {
     }
   };
 
+  const deleteProductById = (id: string) => {
+    setShowToast(true);
+    setToastMsg({
+      severity: "success",
+      msg: "Product added successfully!",
+    });
+    const products = localStorage.getItem("products");
+    const filtered =
+      products && JSON.parse(products).filter((p: any) => p.id !== id);
+    localStorage.setItem("products", JSON.stringify(filtered));
+    window.location.reload();
+  };
+
   return (
     <Box
       p={4}
       sx={{
         backgroundColor: "#f1f3f6",
-        height: "88vh",
+        height: {
+          xs: "calc(100vh - 100px)",
+          sm: "calc(100vh - 120px)",
+          md: "81vh",
+        },
         overflowY: "scroll",
         paddingTop: selectedProduct && "0px !important",
       }}
     >
-      {!selectedProduct && (
-        <Button onClick={() => setOpenDrawer(true)}>Add Product</Button>
+      {!selectedProduct && userType && userType === "admin" && (
+        <Button
+          onClick={() => setOpenDrawer(true)}
+          sx={{
+            color: "#1976d2",
+            marginBottom: "1rem",
+            borderRadius: "1rem",
+            background: "#FFF",
+            boxShadow: "2px 2px 10px 0px rgba(0, 0, 0, 0.17)",
+          }}
+        >
+          Add Product
+        </Button>
       )}
 
       {!selectedProduct ? (
         <Grid container spacing={3}>
-          {products.map((product) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={product.id}>
-              <Card>
-                <CardHeader
-                  title={product.name}
-                  subheader={`$${product.price}`}
-                  avatar={
-                    <Avatar>
-                      <Inventory />
-                    </Avatar>
-                  }
-                />
+          {products.map((product: any) => (
+            <Grid
+              sx={{ height: "22.7rem " }}
+              size={{ xs: 12, sm: 6, md: 4 }}
+              key={product.id}
+            >
+              <Card sx={{ height: "100%" }}>
+                <div
+                  style={{
+                    height: "20%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <CardHeader
+                    title={product.name}
+                    subheader={`$${product.price}`}
+                    avatar={
+                      <Avatar>
+                        <Inventory />
+                      </Avatar>
+                    }
+                  />
+                  {userType && userType === "admin" && (
+                    <div
+                      style={{
+                        width: "1.625rem",
+                        padding: "0.25rem 0.3125rem",
+                        marginRight: "1rem",
+                        display: "flex",
+                        cursor: "pointer",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderRadius: "1.625rem",
+                        background: "#FFF",
+                        boxShadow: "2px 2px 10px 0px rgba(0, 0, 0, 0.17)",
+                        height: "1.625rem",
+                      }}
+                      onClick={() => deleteProductById(product.id)}
+                    >
+                      <DeleteIcon />
+                    </div>
+                  )}
+                </div>
                 <CardContent
                   sx={{
+                    height: "70%",
                     display: "flex",
                     flexDirection: "column",
+                    justifyContent: "space-between",
                     alignItems: "center",
                     gap: "1rem",
                   }}
@@ -914,6 +978,13 @@ const Products = () => {
       >
         <AddProductPage />
       </Dialog>
+      <Notify
+        open={showToast}
+        severity={toastMsg.severity}
+        onClose={() => setShowToast(false)}
+      >
+        <span>{toastMsg.msg}</span>
+      </Notify>
     </Box>
   );
 };
