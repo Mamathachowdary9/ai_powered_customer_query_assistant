@@ -7,7 +7,7 @@ function App() {
   const login = localStorage.getItem("login");
   return (
     <>
-      {login === "false" && <Navigate to="/login" />}
+      {(login || login === "false") && <Navigate to="/login" />}
       {login === "true" && (
         <>
           <Header />
