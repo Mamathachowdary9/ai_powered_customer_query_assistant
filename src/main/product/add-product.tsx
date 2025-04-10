@@ -77,7 +77,7 @@ const AddProductPage: React.FC = () => {
   return (
     <Container maxWidth="md">
       <Box py={4}>
-        <Paper elevation={3} sx={{ p: 3, borderRadius: 3, bgcolor: "#f9f9f9" }}>
+        <>
           <Typography
             variant="h4"
             gutterBottom
@@ -315,7 +315,7 @@ const AddProductPage: React.FC = () => {
               </Grid>
             </Grid>
           </form>
-        </Paper>
+        </>
       </Box>
     </Container>
   );

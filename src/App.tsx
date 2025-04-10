@@ -19,6 +19,10 @@ import {
   Autocomplete,
   Paper,
   Popper,
+  Drawer,
+  ListItemButton,
+  ListItemIcon,
+  Dialog,
 } from "@mui/material";
 import {
   ArrowBack,
@@ -30,6 +34,7 @@ import {
 import ForumIcon from "@mui/icons-material/Forum";
 import Header from "./main/header/header";
 import Login from "./main/login/login";
+import AddProductPage from "./main/product/add-product";
 
 interface Product {
   id: string;
@@ -65,6 +70,7 @@ function App() {
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [openDrawer, setOpenDrawer] = useState(false);
 
   const QUESTIONS = [
     "What is this product?",
@@ -610,11 +616,30 @@ function App() {
     );
   }
 
+  const DrawerList = (
+    <Box
+      sx={{ width: 250 }}
+      role="presentation"
+      onClick={() => setOpenDrawer(false)}
+    >
+      <List>
+        {["Add Product"].map((text, index) => (
+          <ListItem key={text} disablePadding>
+            <ListItemButton>
+              <ListItemIcon></ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
+
   return (
     <>
-      <Login />
+      {/* <Login /> */}
       {}
-      {/* <>
+      <>
         <Header />
         <Box
           p={4}
@@ -625,6 +650,7 @@ function App() {
             paddingTop: selectedProduct && "0px !important",
           }}
         >
+          <Button onClick={() => setOpenDrawer(true)}>Add Product</Button>
           {!selectedProduct ? (
             <Grid container spacing={3}>
               {products.map((product) => (
@@ -908,8 +934,19 @@ function App() {
               </Card>
             </Box>
           )}
+          <Dialog
+            open={openDrawer}
+            onClose={() => setOpenDrawer(false)}
+            PaperProps={{
+              sx: {
+                borderRadius: "1rem",
+              },
+            }}
+          >
+            <AddProductPage />
+          </Dialog>
         </Box>
-      </> */}
+      </>
     </>
   );
 }
